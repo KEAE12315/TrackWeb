@@ -23,5 +23,14 @@
     "express": "^4.18.1",
     "leaflet": "^1.8.0",
     "nodemon": "^2.0.19"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      ".git",
+      "node_modules",
+      ".gitignore",
+      "results"
+    ],
+    "ext": "js,json"
   }
 }
