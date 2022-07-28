@@ -30,10 +30,11 @@
 
     <form id="formType" onsubmit="return false"
         style="position: fixed;right: 50px;top: 20px;background-color: aliceblue;padding-right: 10px;">
-        <input type="radio" name="type" value="activity" checked="checked">驻足活动点<br>
+        <input type="radio" name="type" value="activity">驻足活动点<br>
         <input type="radio" name="type" value="move">移动点<br>
         <input type="radio" name="type" value="slow">慢速移动点<br>
         <input type="radio" name="type" value="tempory">暂时停止点<br>
+        <input type="radio" name="type" value="none">空<br>
         <input type="submit" value="Submit">
     </form>
 
@@ -68,7 +69,9 @@
     updateData()
 
 
+    // 生成热力图
     makeHeatMap(data)
+    // 生成路线图
     makeLine(data)
 
     // 一些全局变量
@@ -137,7 +140,7 @@
             var msg = 'index: ' + p.index.toString() + '\r' +
                 'lat: ' + p.lat.toString() + '\r' +
                 'lng: ' + p.lng.toString() + '\r' +
-                'datetime: ' + p.datatime + '\r' +
+                'datetime: ' + p.datetime + '\r' +
                 'type: ' + p.type + '\r'
 
             let markercolor
@@ -168,19 +171,38 @@
 
         var track = dataIter(data.filter(val => val.trackID == trackID))
         var trackID = 1
-        $('#formType').submit(function () {
-            var point = track.next().value
-            updateSupplementMessage(point.index - 1, point.index, point.index + 1)
-            makeMarker(point.index, point.trackID)
-            point.type = $('#formType').serializeArray()[0].value
+        var point = track.next().value
 
-            // 直接给点赋值，如果已经之前赋值过由后台给信息，但还是会赋值
-            $.post('http://localhost:5000/mark/point', point, function (res) {
-                document.getElementById("message").innerHTML = res.msg
-            })
+        makeMarker(point.index, point.trackID)
+        updateSupplementMessage(point.index - 1, point.index, point.index + 1)
+        $("input[name=type][value=" + point.type + "]").attr("checked", true);
+
+        // 如果想要设定默认单选值，请解除以下注释
+        // $("input[name=type][value=move]").attr("checked", true);
+
+        $('#formType').submit(function () {
+            if (point === undefined) { }
+            else {
+                // 直接给点赋值，如果已经之前赋值过由后台给信息，但还是会赋值
+                point.type = $('#formType').serializeArray()[0].value
+                $.post('http://localhost:5000/mark/point', point, function (res) {
+                    document.getElementById("message").innerHTML = res.msg
+                })
+            }
+
             // 重新从后台更新数据
             updateData()
+
+            // 重新更新信息
+            point = track.next().value
+            makeMarker(point.index, point.trackID)
+            updateSupplementMessage(point.index - 1, point.index, point.index + 1)
+            $("input[name=type][value=" + point.type + "]").attr("checked", true);
+
+            // 如果想要设定默认单选值，请解除以下注释
+            // $("input[name=type][value=move]").attr("checked", true);
         })
+
     }
 
     // 切换不同的轨迹, 由trackID决定
@@ -203,6 +225,8 @@
             typef = ''
         } else {
             s1 = getDistance(data[pfi].lat, data[pfi].lng, data[pi].lat, data[pi].lng) / getIntervelSecond(data[pfi], data[pi])
+            s1 = s1.toFixed(2)
+            s1 = s1.toString() + 'm/s'
             typef = data[pfi].type
         }
 
@@ -211,13 +235,15 @@
             typea = ''
         } else {
             s2 = getDistance(data[pi].lat, data[pi].lng, data[pai].lat, data[pai].lng) / getIntervelSecond(data[pi], data[pai])
+            s2 = s2.toFixed(2)
+            s2 = s2.toString() + 'm/s'
             typea = data[pai].type
         }
 
         let msg = 'previous point(' + pfi + '): ' + typef + '<br>' +
-            '    interval speed: ' + s1.toString() + '<br>' +
+            '    interval speed: ' + s1 + '<br>' +
             'ready to mark: point(' + pi + '): ' + data[pi].type + '<br>' +
-            '    interval speed: ' + s2.toString() + '<br>' +
+            '    interval speed: ' + s2 + '<br>' +
             'next point(' + pai + '): ' + typea
 
         document.getElementById("msgSupplement").innerHTML = msg

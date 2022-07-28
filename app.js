@@ -11,7 +11,7 @@ var server = app.listen(5000, function () {
 });
 
 
-const resultsPath = '/home/keae/markingGPS/results/result.json'
+const resultsPath = 'results/result.json'
 const fs = require('fs')
 
 
@@ -27,6 +27,9 @@ app.post('/mark/point', function (req, res) {
     if (data[index].type != 'none') {
         response.code = 201
         response.msg = 'warning: type of point(' + index.toString() + ') from ' + data[index].type + ' to ' + req.body.type
+    } else if (req.body.type == 'none') {
+        response.code = 201
+        response.msg = "warning: you don't mark the point(" + index.toString() + ')'
     } else {
         response.code = 200
         response.msg = 'success: updata point(' + index.toString() + ') to ' + req.body.type

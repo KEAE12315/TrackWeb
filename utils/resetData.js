@@ -1,6 +1,6 @@
 const fs = require('fs')
 const datasetPath = '/home/keae/flotation/dataset/Geolife Trajectories 1.3/Data/001/Trajectory/'
-const resultsPath = '/home/keae/markingGPS/results/result.json'
+const resultsPath = 'results/result.json'
 
 var result = []
 var trackID = 1
