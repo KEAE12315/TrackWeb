@@ -10,17 +10,20 @@ var server = app.listen(5000, function () {
     console.log('Listening on port %d', server.address().port);
 });
 
-
+const datasetPath = 'dataset/Geolife Trajectories 1.3/Data/001/Trajectory/'
 const resultsPath = 'results/result.json'
-const fs = require('fs')
-
+const load = require('./utils/load.js')
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + "/" + "index.html")
+    res.sendFile(__dirname + "/views/" + "index.html")
+})
+
+app.get('/contrast', function (req, res) {
+    res.sendFile(__dirname + "/views/" + "contrast.html")
 })
 
 app.post('/mark/point', function (req, res) {
-    var data = JSON.parse(fs.readFileSync(resultsPath, 'utf8'))
+    var data = load.getData(resultsPath)
     var index = req.body.index
     var response = {}
 
@@ -36,16 +39,16 @@ app.post('/mark/point', function (req, res) {
     }
 
     data[index].type = req.body.type
-    fs.writeFile(resultsPath, JSON.stringify(data), err => {
-        if (err) {
-            console.error(err)
-            return
-        }
-    })
+    load.setData(data, resultsPath)
 
     res.send(response)
 })
 
 app.get('/data', function (req, res) {
-    res.send(JSON.parse(fs.readFileSync(resultsPath, 'utf8')))
+    res.send(load.getData(resultsPath))
+})
+
+app.post('/data', function (req, res) {
+    data = load.loadRaw(datasetPath, req.body.step)
+    res.send(data)
 })
