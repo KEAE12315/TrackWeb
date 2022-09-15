@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "nodemon app.js"
+    "serve": "nodemon app.js",
+    "export": "zip -q -r /mnt/c/Users/KEAE/Desktop/marking.zip *"
   },
   "repository": {
     "type": "git",
